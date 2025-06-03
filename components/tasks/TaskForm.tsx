@@ -1,10 +1,9 @@
-
 import { ThemedText } from '@/components/ThemedText';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import tw from 'twrnc';
 
@@ -123,6 +122,14 @@ export const TaskForm = ({
     
     if (!title.trim()) {
       newErrors.title = 'Title is required';
+    } else if (title.trim().length < 3) {
+      newErrors.title = 'Title must be at least 3 characters';
+      // Show alert for title length
+      Alert.alert(
+        "Invalid Title",
+        "Task title must be at least 3 characters long.",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+      );
     }
     
     if (!category) {
@@ -319,7 +326,6 @@ export const TaskForm = ({
                 value={dueDate}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                
                 onChange={onDateChange}
                 minimumDate={new Date()}
               />
