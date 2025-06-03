@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StatusBar, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Keyboard, KeyboardAvoidingView, Platform, StatusBar, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import tw from 'twrnc';
 
@@ -42,7 +42,7 @@ export default function ChatScreen() {
 
     // API key for Gemini
     const API_KEY = 'AIzaSyCK92uRwQ_cxsqPOliS3pjcwrsQfeH6rGU';
-    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
     // Auto-scroll to bottom whenever messages change
     useEffect(() => {
@@ -51,6 +51,24 @@ export default function ChatScreen() {
                 flatListRef.current?.scrollToEnd({ animated: true });
             }, 100);
         }
+    }, [messages]);
+
+    // Add keyboard listeners
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            () => {
+                if (messages.length > 0) {
+                    setTimeout(() => {
+                        flatListRef.current?.scrollToEnd({ animated: true });
+                    }, 100);
+                }
+            }
+        );
+
+        return () => {
+            keyboardDidShowListener.remove();
+        };
     }, [messages]);
 
     useEffect(() => {
@@ -326,7 +344,7 @@ const sendMessageToGemini = async (userMessage: string) => {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={[tw`flex-1`, { backgroundColor: themeColors.background }]}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
         >
             <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={themeColors.background} />
             
@@ -336,14 +354,23 @@ const sendMessageToGemini = async (userMessage: string) => {
                 data={messages}
                 renderItem={renderChatMessage}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={tw`pt-6 pb-4`}
+                contentContainerStyle={tw`pt-6 pb-4 px-1`}
                 showsVerticalScrollIndicator={false}
                 initialNumToRender={10}
                 maxToRenderPerBatch={10}
                 windowSize={10}
+                maintainVisibleContentPosition={{
+                    minIndexForVisible: 0,
+                    autoscrollToTopThreshold: 10,
+                }}
                 onContentSizeChange={() => {
                     if (messages.length > 0) {
                         flatListRef.current?.scrollToEnd({ animated: true });
+                    }
+                }}
+                onLayout={() => {
+                    if (messages.length > 0) {
+                        flatListRef.current?.scrollToEnd({ animated: false });
                     }
                 }}
             />
@@ -369,14 +396,14 @@ const sendMessageToGemini = async (userMessage: string) => {
                             placeholder={!userName ? "Enter your name..." : "Type a message..."}
                             placeholderTextColor={themeColors.secondaryText}
                             style={[
-                                tw`flex-1 text-base py-1 px-2`,
+                                tw`flex-1 text-base py-1 px-2 max-h-24`,
                                 { color: themeColors.text }
                             ]}
                             multiline
                             maxLength={500}
                             onSubmitEditing={handleSendMessage}
                             returnKeyType="send"
-                            blurOnSubmit={false}
+                            blurOnSubmit={Platform.OS === 'ios' ? false : true}
                         />
                     </View>
 

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -9,17 +9,46 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Theme storage key
 const THEME_PREFERENCE_KEY = 'user-theme-preference';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  
+  // Animation values
+  const rotateAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  
+  // Update animation when theme changes
+  useEffect(() => {
+    Animated.timing(rotateAnim, {
+      toValue: isDark ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isDark]);
   
   // Toggle between light and dark themes
   const toggleTheme = async () => {
+    // Button press animation
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
     try {
-      const newTheme = colorScheme === 'dark' ? 'light' : 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
       await AsyncStorage.setItem(THEME_PREFERENCE_KEY, newTheme);
       
       // Force reload the app to apply the theme change
@@ -35,28 +64,46 @@ export default function TabLayout() {
     }
   };
 
+  // Interpolate rotation for the icon
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
+
   return (
     <>
       {/* Theme Toggle Button */}
       <View style={styles.themeToggleContainer}>
-        <TouchableOpacity
-          style={[
-            styles.themeToggleButton,
-            { 
-              backgroundColor: colorScheme === 'dark' ? '#333' : '#fff',
-              borderWidth: 1,
-              borderColor: colorScheme === 'dark' ? '#555' : '#ddd',
-            }
-          ]}
-          onPress={toggleTheme}
-          activeOpacity={0.7}
-        >
-          <Ionicons 
-            name={colorScheme === 'dark' ? 'sunny' : 'moon'} 
-            size={22} 
-            color={colorScheme === 'dark' ? '#fff' : '#333'} 
-          />
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <TouchableOpacity
+            style={[styles.themeToggleButton]}
+            onPress={toggleTheme}
+            activeOpacity={0.9}
+          >
+            <LinearGradient
+              colors={isDark 
+                ? ['#1A1A2E', '#16213E'] 
+                : ['#F9FAFB', '#E5E7EB']}
+              style={styles.gradientBackground}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                {isDark ? (
+                  <View style={styles.iconContainer}>
+                    <Ionicons name="moon" size={20} color="#A5B4FC" style={styles.mainIcon} />
+                    <Ionicons name="sunny" size={10} color="#FCD34D" style={styles.secondaryIcon} />
+                  </View>
+                ) : (
+                  <View style={styles.iconContainer}>
+                    <Ionicons name="sunny" size={20} color="#F59E0B" style={styles.mainIcon} />
+                    <Ionicons name="moon" size={10} color="#6B7280" style={styles.secondaryIcon} />
+                  </View>
+                )}
+              </Animated.View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
       
       <Tabs
@@ -104,22 +151,47 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   themeToggleContainer: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30,
+    top: Platform.OS === 'ios' ? 50 : 50,
     right: 20,
     zIndex: 999,
     flexDirection: 'row',
     alignItems: 'center',
   },
   themeToggleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  gradientBackground: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  iconContainer: {
+    position: 'relative',
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainIcon: {
+    position: 'absolute',
+  },
+  secondaryIcon: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
   }
 });
