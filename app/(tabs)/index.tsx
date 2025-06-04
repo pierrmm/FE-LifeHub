@@ -11,6 +11,7 @@ import tw from 'twrnc';
 // Import components
 import { FilterTabs } from '@/components/tasks/FilterTabs';
 import { ProgressBar } from '@/components/tasks/ProgressBar';
+import { TaskChart } from '@/components/tasks/TaskChart';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { TaskItem } from '@/components/tasks/TaskItem';
 import { TaskStats } from '@/components/tasks/TaskStats';
@@ -91,7 +92,7 @@ export default function TabOneScreen() {
 
   return (
     <View style={tw`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <ParallaxScrollView
+       <ParallaxScrollView
         headerBackgroundColor={{ light: '#4F46E5', dark: '#312E81' }}
         headerImage={
           <LinearGradient
@@ -102,36 +103,23 @@ export default function TabOneScreen() {
               entering={FadeIn.duration(1000)}
               style={tw`h-full w-full px-5 justify-center`}
             >
-              {/* Enhanced header content */}
-              <View style={tw`flex-row justify-between items-center mb-3`}>
-                <View>
-                  <ThemedText style={tw`text-white text-lg font-medium opacity-80`}>
-                    {dayName}
-                  </ThemedText>
-                  <ThemedText style={tw`text-white text-3xl font-bold`}>
-                    {monthName} {dayNumber}
-                  </ThemedText>
-                </View>
-
-
+              {/* Time and date display */}
+              <View style={tw`mb-4 mt-6`}>
+                <ThemedText style={tw`text-white text-2xl font-bold`}>
+                  {today.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </ThemedText>
+                <ThemedText style={tw`text-white text-sm opacity-80`}>
+                  {dayName}, {monthName} {dayNumber}
+                </ThemedText>
               </View>
-
-              {/* Quick stats in header */}
-              <View style={tw`flex-row mt-2`}>
-                <View style={tw`bg-white/20 px-4 py-2 rounded-xl mr-3 flex-row items-center`}>
-                  <Ionicons name="list" size={18} color="#FFFFFF" style={tw`mr-2`} />
-                  <ThemedText style={tw`text-white font-medium`}>
-                    {taskStats.total} Tasks
-                  </ThemedText>
-                </View>
-
-                <View style={tw`bg-white/20 px-4 py-2 rounded-xl flex-row items-center`}>
-                  <Ionicons name="time-outline" size={18} color="#FFFFFF" style={tw`mr-2`} />
-                  <ThemedText style={tw`text-white font-medium`}>
-                    {taskStats.pending} Pending
-                  </ThemedText>
-                </View>
-              </View>
+              
+              {/* Weekly task chart */}
+              <TaskChart 
+                completed={taskStats.completed}
+                pending={taskStats.pending}
+                total={taskStats.total}
+                isDark={isDark}
+              />
             </Animated.View>
           </LinearGradient>
         }

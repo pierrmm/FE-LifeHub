@@ -8,7 +8,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import tw from 'twrnc';
 
 // API URL
-const API_URL = 'https://b2e4-158-140-191-43.ngrok-free.app/api';
+const API_URL = 'https://266d-158-140-191-43.ngrok-free.app/api';
 
 interface TaskFormProps {
   onSubmit: (task: any) => void;
