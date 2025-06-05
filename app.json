@@ -1,22 +1,44 @@
 {
   "expo": {
-    "name": "FE-LifeHub",
+    "name": "FE-LifeHub - Your Life, Your Hub",
     "slug": "FE-LifeHub",
     "version": "1.0.0",
+    "description": "Your comprehensive life management hub - organize, track, and enhance your daily life with ease",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logoSplash.jpeg",
     "scheme": "felifehub",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/logoSplash.jpeg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/images/logoSplash.jpeg",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff",
+        "tabletImage": "./assets/images/logoSplash.jpeg"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logoSplash.jpeg",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "splash": {
+        "image": "./assets/images/logoSplash.jpeg",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff",
+        "mdpi": "./assets/images/logoSplash.jpeg",
+        "hdpi": "./assets/images/logoSplash.jpeg",
+        "xhdpi": "./assets/images/logoSplash.jpeg",
+        "xxhdpi": "./assets/images/logoSplash.jpeg",
+        "xxxhdpi": "./assets/images/logoSplash.jpeg"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -28,11 +50,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/logoSplash.jpeg",
+          "imageWidth": 250,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
+          "backgroundColor": "#f0f8ff"        }
       ]
     ],
     "experiments": {
