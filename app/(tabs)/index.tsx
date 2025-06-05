@@ -10,6 +10,8 @@ import tw from 'twrnc';
 
 // Import components
 import { FilterTabs } from '@/components/tasks/FilterTabs';
+
+import { MoodSummary } from '@/components/tasks/MoodSummary';
 import { ProgressBar } from '@/components/tasks/ProgressBar';
 import { TaskChart } from '@/components/tasks/TaskChart';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -253,6 +255,16 @@ export default function TabOneScreen() {
         >
           <TaskStats stats={taskStats} isDark={isDark} />
         </Animated.View>
+           {/* Mood Summary - New Component */}
+        {!loading && todos.length > 0 && (
+          <Animated.View
+            entering={FadeInDown.duration(900)}
+            style={tw`px-3`}
+          >
+          <MoodSummary todos={todos} isDark={isDark} />
+          </Animated.View>
+        )}
+
 
         {/* Progress Bar */}
         <Animated.View
@@ -261,6 +273,7 @@ export default function TabOneScreen() {
         >
           <ProgressBar percentage={progressPercentage} isDark={isDark} />
         </Animated.View>
+     
 
         {/* Filter Tabs */}
         <FilterTabs

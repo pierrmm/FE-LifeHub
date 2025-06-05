@@ -379,21 +379,14 @@ export default function NewsScreen() {
       headerBackgroundColor={{ light: '#667EEA', dark: '#1E1B4B' }}
       headerImage={
         <LinearGradient
-                   colors={isDark ? ['#1E1B4B', '#312E81', '#4338CA'] : ['#667EEA', '#764BA2', '#667EEA']}
+                   colors={isDark ? ['#1E1B4B', '#312E81', '#4338CA'] : ['#3f5eeb', '#5470eb', '#667EEA']}
           style={tw`absolute inset-0`}
         >
           <Animated.View
             entering={FadeIn.duration(1000)}
             style={tw`h-full w-full px-6 justify-center items-center relative`}
           >
-            {/* Background Pattern */}
-            <View style={tw`absolute inset-0 opacity-10`}>
-              <View style={tw`absolute top-10 left-10 w-20 h-20 rounded-full bg-white`} />
-              <View style={tw`absolute top-32 right-16 w-12 h-12 rounded-full bg-white`} />
-              <View style={tw`absolute bottom-20 left-20 w-16 h-16 rounded-full bg-white`} />
-              <View style={tw`absolute bottom-32 right-8 w-8 h-8 rounded-full bg-white`} />
-            </View>
-            
+      
             {/* Header Content */}
             <View style={tw`items-center`}>
               <Animated.View 

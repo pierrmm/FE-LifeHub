@@ -12,6 +12,7 @@ interface Todo {
   created_at: string;
   updated_at: string;
   description: string | null;
+  mood: string | null;  
 }
 
 // API URL
@@ -76,7 +77,7 @@ export const useTodos = () => {
     }
   };
 
-  // Handle form submission
+   // Handle form submission
   const handleSubmit = async (task: any) => {
     try {
       if (editMode && editId !== null) {
@@ -86,6 +87,7 @@ export const useTodos = () => {
           title: task.title,
           category: task.category,
           due_date: task.dueDate,
+          mood: task.mood, // Add mood field
           completed: false
         });
         console.log('Task updated successfully:', response.data);
@@ -96,6 +98,7 @@ export const useTodos = () => {
           title: task.title,
           category: task.category,
           due_date: task.dueDate,
+          mood: task.mood, 
           completed: false
         });
         console.log('Task created successfully:', response.data);
@@ -134,10 +137,11 @@ export const useTodos = () => {
         title: todo.title,
         category: todo.category,
         due_date: todo.due_date,
-        completed: !todo.completed // Toggle status
+        mood: todo.mood, // Preserve mood field
+        completed: !todo.completed 
       });
       
-      // Update local state immediately for better UX
+
       setTodos(prevTodos => 
         prevTodos.map(todo => 
           todo.id === id ? { ...todo, completed: !todo.completed } : todo

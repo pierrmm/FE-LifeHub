@@ -11,6 +11,7 @@ interface Todo {
   category: string;
   due_date: string;
   completed: boolean;
+  mood?: string; 
 }
 
 interface TaskItemProps {
@@ -25,21 +26,21 @@ interface TaskItemProps {
   index?: number;
 }
 
-export const TaskItem = ({ 
-  todo, 
-  toggleComplete, 
-  deleteTodo, 
-  editTodo, 
-  onToggle, 
-  onDelete, 
+export const TaskItem = ({
+  todo,
+  toggleComplete,
+  deleteTodo,
+  editTodo,
+  onToggle,
+  onDelete,
   onEdit,
-  isDark, 
-  index = 0 
+  isDark,
+  index = 0
 }: TaskItemProps) => {
   // Animation values
   const scale = useSharedValue(1);
   const checkboxScale = useSharedValue(1);
-  
+
   // Get category color and icon
   const getCategoryInfo = (category: string) => {
     switch (category) {
@@ -107,19 +108,19 @@ export const TaskItem = ({
 
   const categoryInfo = getCategoryInfo(todo.category);
   const overdue = isOverdue();
-  
+
   // Calculate days remaining or overdue
   const getDaysStatus = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dueDate = new Date(todo.due_date);
     dueDate.setHours(0, 0, 0, 0);
-    
+
     const diffTime = dueDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (todo.completed) return null;
-    
+
     if (diffDays < 0) {
       return `${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''} overdue`;
     } else if (diffDays === 0) {
@@ -131,16 +132,16 @@ export const TaskItem = ({
     }
     return null;
   };
-  
+
   const daysStatus = getDaysStatus();
-  
+
   // Animated styles
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }]
     };
   });
-  
+
   const checkboxAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: checkboxScale.value }]
@@ -156,13 +157,13 @@ export const TaskItem = ({
   const handlePressOut = () => {
     scale.value = withSpring(1, { damping: 10, stiffness: 300 });
   };
-  
+
   // Handle checkbox animation
   const handleCheckboxPress = async () => {
     checkboxScale.value = withTiming(1.2, { duration: 100 }, () => {
       checkboxScale.value = withTiming(1, { duration: 100 });
     });
-    
+
     // Use either toggleComplete or onToggle, whichever is provided
     if (toggleComplete) {
       await toggleComplete(todo.id);
@@ -188,10 +189,51 @@ export const TaskItem = ({
       await onDelete(todo.id);
     }
   };
-  
+  // Get mood color
+  const getMoodColor = (mood: string) => {
+    switch (mood) {
+      case 'senang':
+        return '#F59E0B'; 
+      case 'sedih':
+        return '#3B82F6';
+      case 'stress':
+        return '#EF4444';
+      default:
+        return '#6B7280';
+    }
+  };
+
+  // Get mood icon
+  const getMoodIcon = (mood: string) => {
+    switch (mood) {
+      case 'senang':
+        return 'happy' as any;
+      case 'sedih':
+        return 'sad' as any;
+      case 'stress':
+        return 'flame' as any;
+      default:
+        return 'help-circle' as any;
+    }
+  };
+
+  // Get mood label
+  const getMoodLabel = (mood: string) => {
+    switch (mood) {
+      case 'senang':
+        return 'Happy';
+      case 'sedih':
+        return 'Sad';
+      case 'stress':
+        return 'Stressed';
+      default:
+        return 'Unknown';
+    }
+  };
+
   return (
     // Outer wrapper for entrance animation
-    <Animated.View 
+    <Animated.View
       entering={FadeInDown.duration(400).delay(index * 100 % 500)}
       style={tw`mb-4`}
     >
@@ -217,13 +259,13 @@ export const TaskItem = ({
         >
           <View style={tw`p-4`}>
             {/* Category indicator strip */}
-            <View 
+            <View
               style={[
                 tw`absolute left-0 top-0 bottom-0 w-1.5`,
                 { backgroundColor: isDark ? categoryInfo.darkColor : categoryInfo.lightColor }
-              ]} 
+              ]}
             />
-            
+
             <View style={tw`flex-row items-center`}>
               {/* Task Checkbox with improved animation */}
               <Animated.View style={checkboxAnimatedStyle}>
@@ -231,15 +273,15 @@ export const TaskItem = ({
                   onPress={handleCheckboxPress}
                   style={[
                     tw`w-7 h-7 rounded-full mr-4 items-center justify-center border-2`,
-                    todo.completed 
-                      ? { 
-                          backgroundColor: isDark ? categoryInfo.darkColor : categoryInfo.lightColor, 
-                          borderColor: 'transparent',
-                        }
-                      : { 
-                          borderColor: isDark ? categoryInfo.darkColor : categoryInfo.lightColor,
-                          backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)'
-                        }
+                    todo.completed
+                      ? {
+                        backgroundColor: isDark ? categoryInfo.darkColor : categoryInfo.lightColor,
+                        borderColor: 'transparent',
+                      }
+                      : {
+                        borderColor: isDark ? categoryInfo.darkColor : categoryInfo.lightColor,
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)'
+                      }
                   ]}
                   activeOpacity={0.7}
                 >
@@ -248,11 +290,11 @@ export const TaskItem = ({
                   )}
                 </TouchableOpacity>
               </Animated.View>
-              
+
               {/* Task Content with improved layout */}
               <View style={tw`flex-1`}>
                 <View style={tw`flex-row items-center`}>
-                  <ThemedText 
+                  <ThemedText
                     style={[
                       tw`font-medium text-base flex-1`,
                       todo.completed && tw`line-through text-gray-400 dark:text-gray-500`,
@@ -262,41 +304,80 @@ export const TaskItem = ({
                   >
                     {todo.title}
                   </ThemedText>
-                  
-                  {/* Category badge with improved design */}
-                  <View 
-                    style={[
-                      tw`px-2 py-1 rounded-full ml-2 flex-row items-center`,
-                      { backgroundColor: isDark ? `${categoryInfo.darkColor}30` : `${categoryInfo.lightColor}15` }
-                    ]}
-                  >
-                    <Ionicons 
-                      name={categoryInfo.icon as any} 
-                      size={12} 
-                      color={isDark ? categoryInfo.darkColor : categoryInfo.lightColor} 
-                      style={tw`mr-1`}
-                    />
-                    <ThemedText 
+
+                 
+
+                  <View style={tw`flex-row items-center`}>
+                    <ThemedText
                       style={[
-                        tw`text-xs font-medium`,
-                        { color: isDark ? categoryInfo.darkColor : categoryInfo.lightColor }
+                        tw`font-medium text-base flex-1`,
+                        todo.completed && tw`line-through text-gray-400 dark:text-gray-500`,
+                        overdue && !todo.completed && tw`text-red-500 dark:text-red-400`
+                      ]}
+                      numberOfLines={todo.completed ? 1 : undefined}
+                    >
+                      {todo.title}
+                    </ThemedText>
+                    {/* Category badge with improved design */}
+                    <View
+                      style={[
+                        tw`px-2 py-1 rounded-full ml-2 flex-row items-center`,
+                        { backgroundColor: isDark ? `${categoryInfo.darkColor}30` : `${categoryInfo.lightColor}15` }
                       ]}
                     >
-                      {categoryInfo.label}
-                    </ThemedText>
+                      <Ionicons
+                        name={categoryInfo.icon as any}
+                        size={12}
+                        color={isDark ? categoryInfo.darkColor : categoryInfo.lightColor}
+                        style={tw`mr-1`}
+                      />
+                      <ThemedText
+                        style={[
+                          tw`text-xs font-medium`,
+                          { color: isDark ? categoryInfo.darkColor : categoryInfo.lightColor }
+                        ]}
+                      >
+                        {categoryInfo.label}
+                      </ThemedText>
+                    </View>
+
+                    {/* Mood badge - only show if mood exists */}
+                    {todo.mood && (
+                      <View
+                        style={[
+                          tw`px-2 py-1 rounded-full ml-2 flex-row items-center`,
+                          { backgroundColor: isDark ? `${getMoodColor(todo.mood)}30` : `${getMoodColor(todo.mood)}15` }
+                        ]}
+                      >
+                        <Ionicons
+                          name={getMoodIcon(todo.mood)}
+                          size={12}
+                          color={isDark ? getMoodColor(todo.mood) : getMoodColor(todo.mood)}
+                          style={tw`mr-1`}
+                        />
+                        <ThemedText
+                          style={[
+                            tw`text-xs font-medium`,
+                            { color: isDark ? getMoodColor(todo.mood) : getMoodColor(todo.mood) }
+                          ]}
+                        >
+                          {getMoodLabel(todo.mood)}
+                        </ThemedText>
+                      </View>
+                    )}
                   </View>
                 </View>
-                
+
                 {/* Date and status indicators */}
                 <View style={tw`flex-row items-center mt-2`}>
                   <View style={tw`flex-row items-center`}>
-                    <Ionicons 
-                      name="calendar-outline" 
-                      size={14} 
-                      color={overdue ? (isDark ? '#F87171' : '#EF4444') : (isDark ? '#9CA3AF' : '#6B7280')} 
+                    <Ionicons
+                      name="calendar-outline"
+                      size={14}
+                      color={overdue ? (isDark ? '#F87171' : '#EF4444') : (isDark ? '#9CA3AF' : '#6B7280')}
                       style={tw`mr-1`}
                     />
-                                       <ThemedText 
+                    <ThemedText
                       style={[
                         tw`text-xs`,
                         overdue && !todo.completed && tw`text-red-500 dark:text-red-400`
@@ -305,25 +386,25 @@ export const TaskItem = ({
                       {formatDate(todo.due_date)}
                     </ThemedText>
                   </View>
-                  
+
                   {/* Days status indicator */}
                   {daysStatus && (
-                    <View 
+                    <View
                       style={[
                         tw`ml-3 px-2 py-0.5 rounded-full flex-row items-center`,
-                        overdue 
-                          ? tw`bg-red-100 dark:bg-red-900/30` 
-                          : daysStatus === "Due today" 
+                        overdue
+                          ? tw`bg-red-100 dark:bg-red-900/30`
+                          : daysStatus === "Due today"
                             ? tw`bg-yellow-100 dark:bg-yellow-900/30`
                             : tw`bg-blue-100 dark:bg-blue-900/30`
                       ]}
                     >
-                      <ThemedText 
+                      <ThemedText
                         style={[
                           tw`text-xs font-medium`,
-                          overdue 
-                            ? tw`text-red-600 dark:text-red-400` 
-                            : daysStatus === "Due today" 
+                          overdue
+                            ? tw`text-red-600 dark:text-red-400`
+                            : daysStatus === "Due today"
                               ? tw`text-yellow-600 dark:text-yellow-400`
                               : tw`text-blue-600 dark:text-blue-400`
                         ]}
@@ -335,7 +416,7 @@ export const TaskItem = ({
                 </View>
               </View>
             </View>
-            
+
             {/* Action buttons */}
             <View style={tw`flex-row justify-end mt-3 pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
               <TouchableOpacity
@@ -343,26 +424,26 @@ export const TaskItem = ({
                 onPress={handleEditTask}
                 activeOpacity={0.7}
               >
-                <Ionicons 
-                  name="pencil" 
-                  size={16} 
-                  color={isDark ? '#60A5FA' : '#3B82F6'} 
+                <Ionicons
+                  name="pencil"
+                  size={16}
+                  color={isDark ? '#60A5FA' : '#3B82F6'}
                   style={tw`mr-1`}
                 />
                 <ThemedText style={tw`text-xs font-medium text-blue-500 dark:text-blue-400`}>
                   Edit
                 </ThemedText>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={tw`flex-row items-center`}
                 onPress={handleDeleteTask}
                 activeOpacity={0.7}
               >
-                <Ionicons 
-                  name="trash-outline" 
-                  size={16} 
-                  color={isDark ? '#F87171' : '#EF4444'} 
+                <Ionicons
+                  name="trash-outline"
+                  size={16}
+                  color={isDark ? '#F87171' : '#EF4444'}
                   style={tw`mr-1`}
                 />
                 <ThemedText style={tw`text-xs font-medium text-red-500 dark:text-red-400`}>

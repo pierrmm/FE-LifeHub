@@ -16,13 +16,13 @@ export const FilterTabs = ({ selectedFilter, setSelectedFilter, isDark }: Filter
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'pribadi':
-        return isDark ? '#60A5FA' : '#2563EB'; // Brighter blue for dark mode
+        return isDark ? '#60A5FA' : '#2563EB'; 
       case 'kerja':
-        return isDark ? '#F87171' : '#DC2626'; // Brighter red for dark mode
+        return isDark ? '#EF4444' : '#DC2626'; 
       case 'belajar':
-        return isDark ? '#34D399' : '#059669'; // Brighter green for dark mode
+        return isDark ? '#34D399' : '#059669'; 
       default:
-        return isDark ? '#818CF8' : '#4F46E5'; // Brighter indigo for dark mode
+        return isDark ? '#818CF8' : '#4F46E5'; 
     }
   };
 

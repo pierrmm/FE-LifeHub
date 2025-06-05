@@ -32,6 +32,7 @@ export const TaskForm = ({
   // Form state
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('pribadi');
+  const [mood, setMood] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -48,6 +49,7 @@ export const TaskForm = ({
           
           setTitle(task.title);
           setCategory(task.category);
+          setMood(task.mood || null);
           
           // Parse date string to Date object
           const date = new Date(task.due_date);
@@ -62,6 +64,7 @@ export const TaskForm = ({
         // Reset form for new task
         setTitle('');
         setCategory('pribadi');
+        setMood(null);
         setDueDate(new Date());
         setIsEditOperation(false);
       }
@@ -116,6 +119,36 @@ export const TaskForm = ({
     }
   };
 
+  // Get mood data for UI
+  const getMoodData = (moodType: string) => {
+    switch (moodType) {
+      case 'senang':
+        return {
+          color: '#F59E0B',
+          icon: 'happy',
+          label: 'Happy'
+        };
+      case 'sedih':
+        return {
+          color: '#3B82F6',
+          icon: 'sad',
+          label: 'Sad'
+        };
+      case 'stress':
+        return {
+          color: '#EF4444',
+          icon: 'flame',
+          label: 'Stressed'
+        };
+      default:
+        return {
+          color: '#6B7280',
+          icon: 'help-circle',
+          label: 'Unknown'
+        };
+    }
+  };
+
   // Validate form
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -151,6 +184,7 @@ export const TaskForm = ({
       const taskData = {
         title: title.trim(),
         category,
+        mood,
         dueDate: dueDate.toISOString().split('T')[0],
       };
       
@@ -164,6 +198,7 @@ export const TaskForm = ({
       // Reset form
       setTitle('');
       setCategory('pribadi');
+      setMood(null);
       setDueDate(new Date());
       setErrors({});
     } catch (error) {
@@ -177,6 +212,7 @@ export const TaskForm = ({
   const handleCancel = () => {
     setTitle('');
     setCategory('pribadi');
+    setMood(null);
     setDueDate(new Date());
     setErrors({});
     onCancel();
@@ -235,7 +271,7 @@ export const TaskForm = ({
         </Animated.View>
         
         {/* Category Selection */}
-        <Animated.View entering={FadeIn.delay(300)}>
+        <Animated.View entering={FadeIn.delay(200)}>
           <View style={tw`mb-4 w-full`}>
             <ThemedText style={[
               tw`mb-2 font-semibold`,
@@ -291,9 +327,61 @@ export const TaskForm = ({
           </View>
         </Animated.View>
         
+        {/* Mood Selection */}
+        <Animated.View entering={FadeIn.delay(300)}>
+          <View style={tw`mb-4 w-full`}>
+            <ThemedText style={[
+              tw`mb-2 font-semibold`,
+              { color: isDark ? '#E5E7EB' : '#374151' }
+            ]}>
+              Mood (Optional)
+            </ThemedText>
+            <View style={tw`flex-row flex-wrap gap-2`}>
+              {['senang', 'sedih', 'stress'].map((moodType) => {
+                const moodData = getMoodData(moodType);
+                const isSelected = mood === moodType;
+                return (
+                  <TouchableOpacity
+                    key={moodType}
+                    onPress={() => setMood(isSelected ? null : moodType)}
+                    style={[
+                      tw`flex-row items-center px-3 py-2 rounded-xl border`,
+                      {
+                        backgroundColor: isSelected 
+                          ? `${moodData.color}20` 
+                          : isDark ? '#374151' : '#F9FAFB',
+                        borderColor: isSelected 
+                          ? moodData.color 
+                          : isDark ? '#4B5563' : '#E5E7EB',
+                      }
+                    ]}
+                  >
+                    <Ionicons 
+                      name={moodData.icon as any} 
+                      size={16} 
+                      color={moodData.color} 
+                      style={tw`mr-2`}
+                    />
+                                        <ThemedText 
+                      style={[
+                        tw`font-medium`,
+                        isSelected 
+                          ? { color: moodData.color } 
+                          : { color: isDark ? '#E5E7EB' : '#374151' }
+                      ]}
+                    >
+                      {moodData.label}
+                    </ThemedText>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </Animated.View>
+        
         {/* Due Date Selection */}
         <Animated.View entering={FadeIn.delay(400)}>
-          <View style={tw`mb-6 w-full`}>
+          <View style={tw`mb-4 w-full`}>
             <ThemedText style={[
               tw`mb-2 font-semibold`,
               { color: isDark ? '#E5E7EB' : '#374151' }
@@ -303,29 +391,28 @@ export const TaskForm = ({
             <TouchableOpacity
               onPress={() => setShowDatePicker(true)}
               style={[
-                tw`px-4 py-3 rounded-xl border flex-row items-center`,
+                tw`px-4 py-3 rounded-xl border flex-row items-center justify-between`,
                 {
                   backgroundColor: isDark ? '#374151' : '#F9FAFB',
                   borderColor: isDark ? '#4B5563' : '#E5E7EB',
                 }
               ]}
             >
-              <Ionicons 
-                name="calendar-outline" 
-                size={18} 
-                color={isDark ? '#D1D5DB' : '#6B7280'} 
-                style={tw`mr-3`}
-              />
-              <ThemedText style={tw`text-base`}>
+              <ThemedText style={{ color: isDark ? '#E5E7EB' : '#1F2937' }}>
                 {formatDate(dueDate)}
               </ThemedText>
+              <Ionicons 
+                name="calendar" 
+                size={18} 
+                color={isDark ? '#9CA3AF' : '#6B7280'} 
+              />
             </TouchableOpacity>
             
             {showDatePicker && (
               <DateTimePicker
                 value={dueDate}
                 mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                display="default"
                 onChange={onDateChange}
                 minimumDate={new Date()}
               />
@@ -333,20 +420,22 @@ export const TaskForm = ({
           </View>
         </Animated.View>
         
-        {/* Form Actions */}
+        {/* Action Buttons */}
         <Animated.View 
           entering={FadeIn.delay(500)}
-          style={tw`flex-row justify-end mt-2`}
+          style={tw`flex-row justify-end mt-4`}
         >
           <TouchableOpacity
             onPress={handleCancel}
-            style={tw`px-5 py-3 rounded-xl mr-3`}
+            style={[
+              tw`px-5 py-3 rounded-xl mr-3`,
+              {
+                backgroundColor: isDark ? '#374151' : '#F3F4F6',
+              }
+            ]}
             disabled={isSubmitting}
           >
-            <ThemedText style={[
-              tw`font-medium`,
-              { color: isDark ? '#D1D5DB' : '#6B7280' }
-            ]}>
+            <ThemedText style={{ color: isDark ? '#E5E7EB' : '#4B5563' }}>
               Cancel
             </ThemedText>
           </TouchableOpacity>
@@ -364,9 +453,16 @@ export const TaskForm = ({
           >
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#FFFFFF" style={tw`mr-2`} />
-            ) : null}
+            ) : (
+              <Ionicons 
+                name={isEditOperation ? "save" : "add-circle"} 
+                size={18} 
+                color="#FFFFFF" 
+                style={tw`mr-2`}
+              />
+            )}
             <ThemedText style={tw`text-white font-medium`}>
-              {isSubmitting ? 'Saving...' : isEditOperation ? 'Update Task' : 'Add Task'}
+              {isEditOperation ? 'Save Changes' : 'Add Task'}
             </ThemedText>
           </TouchableOpacity>
         </Animated.View>
